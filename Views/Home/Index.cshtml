@@ -1,0 +1,75 @@
+﻿@model Waads.Models.EmployeeDashboardViewModel
+
+<div class="container mt-4">
+    <h2 class="mb-4">Employee Overview</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-info text-white shadow">
+                <div class="card-body text-center">
+                    <h5>Pending</h5>
+                    <h2 class="display-4">@Model.PendingCount</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white shadow">
+                <div class="card-body text-center">
+                    <h5>Overdue</h5>
+                    <h2 class="display-4">@Model.OverdueCount</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body text-center">
+                    <h5>Completed</h5>
+                    <h2 class="display-4">@Model.CompletedCount</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white shadow">
+                <div class="card-body text-center">
+                    <h5>New Alerts</h5>
+                    <h2 class="display-4">@Model.NewAlertsCount</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white font-weight-bold">My Recent Follow-Ups</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm m-0">
+                        <tbody>
+                            @foreach (var item in Model.RecentFollowUps)
+                            {
+                                <tr>
+                                    <td class="p-3"><strong>@item.Title</strong><br /><small class="text-muted">@item.OrganizationName</small></td>
+                                    <td class="p-3 text-right">@item.DueDate.ToShortDateString()</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="card shadow-sm border-left-danger">
+                <div class="card-header bg-white font-weight-bold">Latest Notifications</div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var alert in Model.RecentAlerts)
+                    {
+                        <li class="list-group-item">
+                            <small class="text-danger font-weight-bold">@alert.CreatedAt.ToShortTimeString()</small><br />
+                            @alert.Message
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

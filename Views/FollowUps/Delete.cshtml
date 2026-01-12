@@ -1,0 +1,29 @@
+﻿@model Waads.Models.FollowUp
+
+@{
+    ViewData["Title"] = "Delete Follow-Up";
+}
+
+<div class="container mt-5">
+    <div class="alert alert-danger shadow">
+        <h4 class="alert-heading">⚠️ Warning!</h4>
+        <p>Are you sure you want to permanently delete this commitment? This action cannot be undone.</p>
+        <hr>
+        <dl class="row">
+            <dt class="col-sm-3">Title</dt>
+            <dd class="col-sm-9">@Model.Title</dd>
+
+            <dt class="col-sm-3">Organization</dt>
+            <dd class="col-sm-9">@Model.OrganizationName</dd>
+
+            <dt class="col-sm-3">Due Date</dt>
+            <dd class="col-sm-9">@Model.DueDate.ToString("f")</dd>
+        </dl>
+
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger mr-2">Confirm Delete</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel and Go Back</a>
+        </form>
+    </div>
+</div>

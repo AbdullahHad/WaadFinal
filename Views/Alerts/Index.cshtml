@@ -1,0 +1,37 @@
+﻿@model IEnumerable<Waads.Models.Alert>
+
+<div class="container mt-4">
+    <h2><i class="fa fa-exclamation-triangle text-danger"></i> System Notifications</h2>
+    <table class="table shadow-sm mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Date</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var alert in Model)
+            {
+                <tr class="@(alert.Status == AlertStatus.New ? "table-warning" : "")">
+                    <td>@alert.CreatedAt.ToString("g")</td>
+                    <td>@alert.Message</td>
+                    <td>
+                        <span class="badge @(alert.Status == AlertStatus.New ? "bg-danger" : "bg-success")">
+                            @alert.Status
+                        </span>
+                    </td>
+                    <td>
+                        @if (alert.Status == AlertStatus.New)
+                        {
+                            <form asp-action="Acknowledge" asp-route-id="@alert.Id" method="post">
+                                <button type="submit" class="btn btn-sm btn-primary">Acknowledge</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

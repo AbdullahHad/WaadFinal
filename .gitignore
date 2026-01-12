@@ -1,0 +1,43 @@
+﻿## Visual Studio Temp Files and Build Results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio Environment and User Settings
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+
+## SQL Server and Local Databases
+*.mdf
+*.ldf
+*.ndf
+*.sdf
+*.db
+*.db-shm
+*.db-wal
+
+## User-Specific Settings
+.vscode/
+appsettings.Development.json
+*.pfx
+*.publishsettings
+
+## Roslyn Analyzer Cache
+.shared/
+.sonarlint/
+
+## Node/Web Dependencies (if any)
+node_modules/
+wwwroot/lib/
