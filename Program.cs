@@ -1,25 +1,32 @@
 using Microsoft.EntityFrameworkCore;
 using Waads.Data;
 using Microsoft.AspNetCore.Identity;
+using Waads.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. DATABASE CONNECTION: Retrieve the connection string for SQL Server
+// 1. DATABASE: Connect to SQL Server
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// 2. CONTEXT REGISTRATION: Connects EF Core to your database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// 3. IDENTITY SERVICES: Setup the core Login/Register logic
-// SignIn.RequireConfirmedAccount = false allows immediate login after registration for testing
+// 2. IDENTITY: Setup Login/Register
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// 4. UI SERVICES: Enable both Controllers (for Dashboard) and Razor Pages (for Login)
+// 3. UI & PAGES: Register MVC and Razor Pages
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+// 4. SIGNALR: Register real-time services
+// This MUST be registered so the Background Service can find 'IHubContext'
+builder.Services.AddSignalR();
+
+// 5. BACKGROUND SERVICE: Register the OverdueTaskService
+// The Background Service now has access to both the Database and the SignalR Hub
+builder.Services.AddHostedService<OverdueTaskService>();
 
 var app = builder.Build();
 
@@ -35,16 +42,18 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// 5. SECURITY PIPELINE: Order is critical here
-app.UseAuthentication(); // First, identify WHO the user is
-app.UseAuthorization();  // Second, check WHAT the user can access
+// 6. SECURITY: Order matters for Identity
+app.UseAuthentication();
+app.UseAuthorization();
 
-// 6. ROUTING: Directs traffic to your Home/Dashboard by default
+// 7. ENDPOINTS: Map MVC, SignalR, and Razor Pages
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// 7. IDENTITY MAPPING: Connects the hidden Identity Login/Register pages
+// Map the real-time bridge for the pop-ups
+app.MapHub<NotificationHub>("/notificationHub");
+
 app.MapRazorPages();
 
 app.Run();

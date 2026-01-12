@@ -6,6 +6,7 @@
     <title>@ViewData["Title"] - Waads</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Waads.styles.css" asp-append-version="true" />
 </head>
@@ -54,7 +55,31 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        // Start the connection to the SignalR Hub
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/notificationHub")
+            .build();
+
+        // Listen for the "ReceiveNotification" event from the server
+        connection.on("ReceiveNotification", function (message) {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "10000"
+            };
+            // Display the pop-up as an error (red) because it's an overdue alert
+            toastr.error(message, 'System Alert');
+        });
+
+        connection.start().catch(err => console.error(err.toString()));
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
