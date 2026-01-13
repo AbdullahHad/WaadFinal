@@ -1,0 +1,75 @@
+﻿@model IEnumerable<Waads.Models.FollowUp>
+
+@{
+    ViewData["Title"] = "User Commitments";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Users">Employees</a></li>
+            <li class="breadcrumb-item active">@ViewBag.UserName</li>
+        </ol>
+    </nav>
+
+    <div class="alert alert-info border-0 shadow-sm">
+        Showing all commitments for: <strong>@ViewBag.UserName</strong>
+    </div>
+
+    <div class="card shadow border-0">
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <p class="text-center py-4 text-muted">This user has not created any follow-ups yet.</p>
+            }
+            else
+            {
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Organization</th>
+                            <th>Title</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Override</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.OrganizationName</td>
+                                <td>@item.Title</td>
+                                <td>@item.DueDate.ToString("g")</td>
+                                <td>
+                                    @if (item.Status == Waads.Models.FollowUpStatus.Completed)
+                                    {
+                                        <span class="badge bg-success">Completed</span>
+                                    }
+                                    else if (item.Status == Waads.Models.FollowUpStatus.Overdue)
+                                    {
+                                        <span class="badge bg-danger">Overdue</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    }
+                                </td>
+                                <td>
+                                    <form asp-action="UpdateStatus" method="post" class="d-flex gap-1">
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <select name="newStatus" class="form-select form-select-sm" onchange="this.form.submit()">
+                                            <option selected disabled>Update...</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Completed">Completed</option>
+                                        </select>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>

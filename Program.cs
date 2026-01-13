@@ -12,20 +12,19 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// 2. IDENTITY: Setup Login/Register
+// 2. IDENTITY: Updated to support Roles
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddRoles<IdentityRole>() // ADD THIS: Enables the Admin role system
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// 3. UI & PAGES: Register MVC and Razor Pages
+// 3. UI & PAGES
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
-// 4. SIGNALR: Register real-time services
-// This MUST be registered so the Background Service can find 'IHubContext'
+// 4. SIGNALR
 builder.Services.AddSignalR();
 
-// 5. BACKGROUND SERVICE: Register the OverdueTaskService
-// The Background Service now has access to both the Database and the SignalR Hub
+// 5. BACKGROUND SERVICE
 builder.Services.AddHostedService<OverdueTaskService>();
 
 var app = builder.Build();
@@ -39,21 +38,46 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
-// 6. SECURITY: Order matters for Identity
+// 6. SECURITY: Identifies user and then checks their Role (Admin/User)
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 7. ENDPOINTS: Map MVC, SignalR, and Razor Pages
+// 7. ENDPOINTS
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Map the real-time bridge for the pop-ups
 app.MapHub<NotificationHub>("/notificationHub");
-
 app.MapRazorPages();
 
+// 8. SEED ADMIN DATA: Automatically creates the Admin role and assigns it to you
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await SeedAdminUser(services);
+}
+
 app.Run();
+
+// --- SEED METHOD ---
+// This runs every time the app starts to ensure you have Admin access
+async Task SeedAdminUser(IServiceProvider serviceProvider)
+{
+    var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+    // Create Admin Role if it doesn't exist
+    if (!await roleManager.RoleExistsAsync("Admin"))
+    {
+        await roleManager.CreateAsync(new IdentityRole("Admin"));
+    }
+
+    // Assign Admin Role to a specific email
+    var adminUser = await userManager.FindByEmailAsync("Asaad@Tuwaiq.com");
+    if (adminUser != null && !await userManager.IsInRoleAsync(adminUser, "Admin"))
+    {
+        await userManager.AddToRoleAsync(adminUser, "Admin");
+    }
+}

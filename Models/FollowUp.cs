@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity; // Add this
 
 namespace Waads.Models
 {
@@ -16,6 +17,9 @@ namespace Waads.Models
         [Required]
         public DateTime DueDate { get; set; }
         public FollowUpStatus Status { get; set; } = FollowUpStatus.Pending;
-        public string? AssignedEmployeeId { get; set; } // Link to Identity User
+        public string? AssignedEmployeeId { get; set; }
+
+        // Add this to link to the User details in the database
+        public virtual IdentityUser? User { get; set; }
     }
 }

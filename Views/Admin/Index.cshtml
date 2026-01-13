@@ -1,0 +1,73 @@
+﻿@model IEnumerable<Waads.Models.FollowUp>
+
+@{
+    ViewData["Title"] = "Global Admin Dashboard";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary"><i class="fa-solid fa-shield-halved"></i> Global Monitoring</h2>
+        <span class="badge bg-dark">Total Waads: @Model.Count()</span>
+    </div>
+
+    <div class="card shadow border-0">
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Employee</th>
+                        <th>Organization</th>
+                        <th>Title</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th class="text-center">Admin Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="fw-bold text-dark">@item.User?.Email</span>
+                            </td>
+                            <td>@item.OrganizationName</td>
+                            <td>
+                                <div>@item.Title</div>
+                                <small class="text-muted">@item.ContactPerson</small>
+                            </td>
+                            <td>
+                                <span class="@(item.DueDate < DateTime.Now && item.Status != Waads.Models.FollowUpStatus.Completed ? "text-danger fw-bold" : "")">
+                                    @item.DueDate.ToString("MMM dd, yyyy HH:mm")
+                                </span>
+                            </td>
+                            <td>
+                                @if (item.Status == Waads.Models.FollowUpStatus.Completed)
+                                {
+                                    <span class="badge bg-success">Completed</span>
+                                }
+                                else if (item.Status == Waads.Models.FollowUpStatus.Overdue)
+                                {
+                                    <span class="badge bg-danger">Overdue</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <form asp-action="UpdateStatus" method="post" class="d-inline-flex gap-2">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <select name="newStatus" class="form-select form-select-sm" onchange="this.form.submit()">
+                                        <option selected disabled>Change Status</option>
+                                        <option value="Pending">Set to Pending</option>
+                                        <option value="Completed">Set to Completed</option>
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
