@@ -1,0 +1,162 @@
+﻿@model IEnumerable<Waads.Models.FollowUp>
+
+@{
+    ViewData["Title"] = "Global Admin Dashboard";
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary"><i class="fa-solid fa-shield-halved"></i> Global Monitoring</h2>
+        <span class="badge bg-dark">Total Waads: @Model.Count()</span>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow border-0 h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title mb-3">Overall Status Distribution</h5>
+                    <div style="max-height: 200px;">
+                        <canvas id="completionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="row g-3 h-100">
+                <div class="col-sm-4">
+                    <div class="card border-warning border-start border-5 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="text-muted small fw-bold">PENDING</div>
+                            <div class="h3 mb-0">@ViewBag.PendingCount</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="card border-danger border-start border-5 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="text-muted small fw-bold">OVERDUE</div>
+                            <div class="h3 mb-0">@ViewBag.OverdueCount</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="card border-success border-start border-5 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="text-muted small fw-bold">COMPLETED</div>
+                            <div class="h3 mb-0">@ViewBag.CompletedCount</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <div class="input-group shadow-sm">
+            <span class="input-group-text bg-white border-end-0 text-muted">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input type="text" id="adminSearch" class="form-control border-start-0"
+                   placeholder="Filter by Organization, Employee, or Title...">
+        </div>
+    </div>
+
+    <div class="card shadow border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0" id="waadTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Employee</th>
+                        <th>Organization</th>
+                        <th>Title</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th class="text-center">Admin Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="fw-bold text-dark">@item.User?.Email</span>
+                            </td>
+                            <td>@item.OrganizationName</td>
+                            <td>
+                                <div>@item.Title</div>
+                                <small class="text-muted">@item.ContactPerson</small>
+                            </td>
+                            <td>
+                                <span class="@(item.DueDate < DateTime.Now && item.Status != Waads.Models.FollowUpStatus.Completed ? "text-danger fw-bold" : "")">
+                                    @item.DueDate.ToString("MMM dd, yyyy HH:mm")
+                                </span>
+                            </td>
+                            <td>
+                                @if (item.Status == Waads.Models.FollowUpStatus.Completed)
+                                {
+                                    <span class="badge bg-success">Completed</span>
+                                }
+                                else if (item.Status == Waads.Models.FollowUpStatus.Overdue)
+                                {
+                                    <span class="badge bg-danger">Overdue</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <form asp-action="UpdateStatus" method="post" class="d-inline-flex gap-2">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <select name="newStatus" class="form-select form-select-sm" onchange="this.form.submit()">
+                                        <option selected disabled>Change Status</option>
+                                        <option value="Pending">Set to Pending</option>
+                                        <option value="Completed">Set to Completed</option>
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // 1. Initialize Analytics Chart
+        const ctx = document.getElementById('completionChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pending', 'Overdue', 'Completed'],
+                datasets: [{
+                    data: [@ViewBag.PendingCount, @ViewBag.OverdueCount, @ViewBag.CompletedCount],
+                    backgroundColor: ['#ffc107', '#dc3545', '#198754'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // 2. Real-time Search Logic
+        document.getElementById('adminSearch').addEventListener('keyup', function() {
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll('#waadTable tbody tr');
+
+            rows.forEach(row => {
+                let rowText = row.innerText.toLowerCase();
+                row.style.display = rowText.includes(filter) ? "" : "none";
+            });
+        });
+    </script>
+}

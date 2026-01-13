@@ -22,6 +22,19 @@
 
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-danger fw-bold" asp-area="" asp-controller="Admin" asp-action="Index">
+                                    <i class="fa-solid fa-lock"></i> Admin Panel
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Users">
+                                    <i class="fa-solid fa-users-gear"></i> Manage Users
+                                </a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Dashboard</a>
                         </li>
@@ -33,6 +46,7 @@
                                 <i class="fa-solid fa-bell text-danger"></i> Alerts
                             </a>
                         </li>
+                    
                     </ul>
 
                     <partial name="_LoginPartial" />
