@@ -19,13 +19,18 @@ namespace Waads.Controllers
             _userManager = userManager;
         }
 
-        // 1. GLOBAL DASHBOARD: View every Waad in the system
+        // 1. GLOBAL DASHBOARD: Updated with Analytics Logic
         public async Task<IActionResult> Index()
         {
             var allFollowUps = await _context.FollowUps
-                .Include(f => f.User) // Now works with the navigation property
-                .OrderByDescending(f => f.DueDate) // Matches your model
+                .Include(f => f.User)
+                .OrderByDescending(f => f.DueDate)
                 .ToListAsync();
+
+            // ANALYTICS: Calculate counts for the Chart
+            ViewBag.PendingCount = allFollowUps.Count(f => f.Status == FollowUpStatus.Pending);
+            ViewBag.OverdueCount = allFollowUps.Count(f => f.Status == FollowUpStatus.Overdue);
+            ViewBag.CompletedCount = allFollowUps.Count(f => f.Status == FollowUpStatus.Completed);
 
             return View(allFollowUps);
         }
